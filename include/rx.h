@@ -10,4 +10,9 @@
 */
 int rx_start(const char *iface);
 
+/*
+    Stop packet capture.
+*/
+void rx_stop(void);
+
 #endif

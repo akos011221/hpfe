@@ -9,12 +9,14 @@
 
 #include "log.h"
 #include "pkt.h"
+#include "rx.h"
 
 static volatile sig_atomic_t g_stop = 0;
 
 static void handle_signal(int sig) {
     (void)sig;
     g_stop = 1;
+    rx_stop();
 }
 
 static void install_signal_handlers(void) {
@@ -131,22 +133,8 @@ int main(int argc, char **argv) {
 
     install_signal_handlers();
 
-    time_t start = time(NULL);
-
-    while (!g_stop) {
-        struct timespec ts;
-        ts.tv_sec = 0;
-        ts.tv_nsec = 100 * 1000 * 1000; // 100ms
-        nanosleep(&ts, NULL);
-
-        if (cfg.duration_sec > 0) {
-            time_t now = time(NULL);
-            if ((int)(now - start) >= cfg.duration_sec) {
-                log_msg(LOG_INFO, "duration reached, stopping");
-                break;
-            }
-        }
-    }
+    log_msg(LOG_INFO, "starting RX");
+    rx_start(cfg.iface);
 
     log_msg(LOG_INFO, "pkt shutting down");
     return 0;

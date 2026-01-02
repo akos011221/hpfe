@@ -8,9 +8,12 @@ set(CMAKE_C_EXTENSIONS OFF)
 add_executable(pkt
   src/main.c
   src/log.c
+  src/rx_pcap.c
 )
 
 target_include_directories(pkt PRIVATE include)
+
+target_link_libraries(pkt pcap)
 
 target_compile_options(pkt PRIVATE
   -Wall
@@ -21,7 +24,7 @@ target_compile_options(pkt PRIVATE
   -Wshadow
   -Wformat=2
   -Wundef
-  -Werror # treat warnings as errors.
+  -Werror
 )
 
 if(CMAKE_BUILD_TYPE STREQUAL "Debug")
