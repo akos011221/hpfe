@@ -1,5 +1,5 @@
-#ifndef pkt_H
-#define pkt_H
+#ifndef PKT_H
+#define PKT_H
 
 #include <stdbool.h>
 #include <stddef.h>
