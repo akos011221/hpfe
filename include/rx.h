@@ -6,7 +6,7 @@
 
 /*
     Start packet capture on an interface.
-    Blocks until pkt is stopped by signal.
+    Blocks until upe is stopped by signal.
 */
 int rx_start(const char *iface);
 

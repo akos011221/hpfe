@@ -1,5 +1,5 @@
-#ifndef PKT_H
-#define PKT_H
+#ifndef upe_H
+#define upe_H
 
 #include <stdbool.h>
 #include <stddef.h>
@@ -9,6 +9,6 @@ typedef struct {
     const char *iface; // interface name
     int verbose;       // 0..2
     int duration_sec;  // 0 = run forever
-} pkt_config_t;
+} upe_config_t;
 
 #endif

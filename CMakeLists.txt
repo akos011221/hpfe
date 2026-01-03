@@ -1,21 +1,21 @@
 cmake_minimum_required(VERSION 3.16)
-project(pkt C)
+project(upe C)
 
 set(CMAKE_C_STANDARD 11)
 set(CMAKE_C_STANDARD_REQUIRED ON)
 set(CMAKE_C_EXTENSIONS OFF)
 
-add_executable(pkt
+add_executable(upe
   src/main.c
   src/log.c
   src/rx_pcap.c
 )
 
-target_include_directories(pkt PRIVATE include)
+target_include_directories(upe PRIVATE include)
 
-target_link_libraries(pkt pcap)
+target_link_libraries(upe pcap)
 
-target_compile_options(pkt PRIVATE
+target_compile_options(upe PRIVATE
   -Wall
   -Wextra
   -Wpedantic
@@ -28,7 +28,7 @@ target_compile_options(pkt PRIVATE
 )
 
 if(CMAKE_BUILD_TYPE STREQUAL "Debug")
-  target_compile_options(pkt PRIVATE -O0 -g3)
+  target_compile_options(upe PRIVATE -O0 -g3)
 elseif(CMAKE_BUILD_TYPE STREQUAL "Release")
-  target_compile_options(pkt PRIVATE -O3)
+  target_compile_options(upe PRIVATE -O3)
 endif()
