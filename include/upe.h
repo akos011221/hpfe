@@ -1,5 +1,5 @@
-#ifndef upe_H
-#define upe_H
+#ifndef UPE_H
+#define UPE_H
 
 #include <stdbool.h>
 #include <stddef.h>
