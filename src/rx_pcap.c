@@ -1,6 +1,7 @@
 #define _DEFAULT_SOURCE
 #define _BSD_SOURCE
 #include "log.h"
+#include "parser.h"
 #include "rx.h"
 
 #include <errno.h>
@@ -12,8 +13,13 @@
 static pcap_t *g_pcap = NULL;
 
 static void process_packet(const uint8_t *pkt, size_t len) {
-    (void)pkt;
-    log_msg(LOG_DEBUG, "RX packet: %zu bytes", len);
+    ipv4_info_t info;
+    if (parse_ipv4(pkt, len, &info) == 0) {
+        log_msg(LOG_DEBUG, "IPv4 %u.%u.%u.%u -> %u.%u.%u.%u proto=%u", (info.src_ip >> 24) & 0xFF,
+                (info.src_ip >> 16) & 0xFF, (info.src_ip >> 8) & 0xFF, info.src_ip & 0xFF,
+                (info.dst_ip >> 24) & 0xFF, (info.dst_ip >> 16) & 0xFF, (info.dst_ip >> 8) & 0xFF,
+                info.dst_ip & 0xFF, info.protocol);
+    }
 }
 
 static void pcap_callback(u_char *user, const struct pcap_pkthdr *hdr, const u_char *bytes) {

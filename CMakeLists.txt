@@ -9,6 +9,7 @@ add_executable(upe
   src/main.c
   src/log.c
   src/rx_pcap.c
+  src/parser.c
 )
 
 target_include_directories(upe PRIVATE include)
