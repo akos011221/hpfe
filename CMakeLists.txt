@@ -10,6 +10,7 @@ add_executable(upe
   src/log.c
   src/rx_pcap.c
   src/parser.c
+  src/flow_table.c
 )
 
 target_include_directories(upe PRIVATE include)

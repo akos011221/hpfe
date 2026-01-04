@@ -6,7 +6,9 @@
 
 static log_level_t g_level = LOG_INFO;
 
-void log_set_level(log_level_t level) { g_level = level; }
+void log_set_level(log_level_t level) {
+    g_level = level;
+}
 
 static const char *level_to_string(log_level_t level) {
     switch (level) {

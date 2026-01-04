@@ -7,6 +7,7 @@
 #include <string.h>
 #include <time.h>
 
+#include "flow_table.h"
 #include "log.h"
 #include "rx.h"
 #include "upe.h"
@@ -53,12 +54,9 @@ static int parse_int(const char *s, int *out) {
     char *end = NULL;
     long v = strtol(s, &end, 10);
 
-    if (errno != 0)
-        return -1;
-    if (end == s || *end != '\0')
-        return -1;
-    if (v < -2147483648L || v > 2147483647L)
-        return -1;
+    if (errno != 0) return -1;
+    if (end == s || *end != '\0') return -1;
+    if (v < -2147483648L || v > 2147483647L) return -1;
 
     *out = (int)v;
     return 0;
@@ -73,26 +71,19 @@ static int parse_args(int argc, char **argv, upe_config_t *cfg) {
         const char *arg = argv[i];
 
         if (strcmp(arg, "--iface") == 0) {
-            if (i + 1 >= argc)
-                return -1;
+            if (i + 1 >= argc) return -1;
             cfg->iface = argv[++i];
         } else if (strcmp(arg, "--verbose") == 0) {
-            if (i + 1 >= argc)
-                return -1;
+            if (i + 1 >= argc) return -1;
             int v = 0;
-            if (parse_int(argv[++i], &v) != 0)
-                return -1;
-            if (v < 0 || v > 2)
-                return -1;
+            if (parse_int(argv[++i], &v) != 0) return -1;
+            if (v < 0 || v > 2) return -1;
             cfg->verbose = v;
         } else if (strcmp(arg, "--duration") == 0) {
-            if (i + 1 >= argc)
-                return -1;
+            if (i + 1 >= argc) return -1;
             int d = 0;
-            if (parse_int(argv[++i], &d) != 0)
-                return -1;
-            if (d < 0)
-                return -1;
+            if (parse_int(argv[++i], &d) != 0) return -1;
+            if (d < 0) return -1;
             cfg->duration_sec = d;
         } else if (strcmp(arg, "--help") == 0) {
             usage(argv[0]);
@@ -110,11 +101,42 @@ static int parse_args(int argc, char **argv, upe_config_t *cfg) {
 static log_level_t verbosity_to_level(int verbose) {
     // verbose: 0..2
     // level: WARN/INFO/DEBUG
-    if (verbose <= 0)
-        return LOG_WARN;
-    if (verbose == 1)
-        return LOG_INFO;
+    if (verbose <= 0) return LOG_WARN;
+    if (verbose == 1) return LOG_INFO;
     return LOG_DEBUG;
+}
+
+static void install_demo_flows(flow_table_t *ft) {
+    /*
+        Seed the flow table with some demo flows.
+    */
+
+    flow_key_t k;
+    flow_action_t a;
+
+    // Allow DNS
+    k.src_ip = 3232235853;
+    k.dst_ip = 3232235843;
+    k.src_port = 64983;
+    k.dst_port = 53;
+    k.protocol = 17;
+
+    a.type = ACT_FWD;
+    a.out_ifindex = 3;
+
+    (void)flow_table_put(ft, &k, &a);
+
+    // Allow SSH
+    k.src_ip = 3232235853;
+    k.dst_ip = 3232235843;
+    k.src_port = 64983;
+    k.dst_port = 22;
+    k.protocol = 6;
+
+    a.type = ACT_FWD;
+    a.out_ifindex = 3;
+
+    (void)flow_table_put(ft, &k, &a);
 }
 
 int main(int argc, char **argv) {
@@ -127,14 +149,21 @@ int main(int argc, char **argv) {
 
     log_set_level(verbosity_to_level(cfg.verbose));
 
+    if (flow_table_init(&cfg.ft, 4096) != 0) {
+        log_msg(LOG_ERROR, "flow_table_init failed");
+        return 1;
+    }
+
     log_msg(LOG_INFO, "upe started");
     log_msg(LOG_INFO, "iface=%s, verbose=%d, duration=%d", cfg.iface, cfg.verbose,
             cfg.duration_sec);
 
     install_signal_handlers();
 
+    install_demo_flows(&cfg.ft);
+
     log_msg(LOG_INFO, "starting RX");
-    rx_start(cfg.iface);
+    rx_start(cfg.iface, &cfg.ft);
 
     log_msg(LOG_INFO, "upe shutting down");
     return 0;
