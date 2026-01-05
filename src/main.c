@@ -129,6 +129,7 @@ static void install_demo_flows(rule_table_t *rt) {
     r2.src_ip = (10u << 24) | (0u << 16) | (0u << 8) | 0u; // 10.0.0.0 in host order
     uint32_t src_mask;
     ipv4_mask_from_prefix(8, &src_mask);
+    r2.src_mask = src_mask;
     r2.action.type = ACT_FWD;
     r2.action.out_ifindex = 3;
     rule_table_add(rt, &r2);
@@ -151,8 +152,8 @@ int main(int argc, char **argv) {
 
     log_set_level(verbosity_to_level(cfg.verbose));
 
-    if (flow_table_init(&cfg.ft, 4096) != 0) {
-        log_msg(LOG_ERROR, "flow_table_init failed");
+    if (rule_table_init(&cfg.rt, 4096) != 0) {
+        log_msg(LOG_ERROR, "rule_table_init failed");
         return 1;
     }
 
@@ -162,10 +163,10 @@ int main(int argc, char **argv) {
 
     install_signal_handlers();
 
-    install_demo_flows(&cfg.ft);
+    install_demo_flows(&cfg.rt);
 
     log_msg(LOG_INFO, "starting RX");
-    rx_start(cfg.iface, &cfg.ft);
+    rx_start(cfg.iface, &cfg.rt);
 
     log_msg(LOG_INFO, "upe shutting down");
     return 0;

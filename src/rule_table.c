@@ -1,5 +1,7 @@
 #include "rule_table.h"
 
+#include <stdlib.h>
+
 /*
     Helper to create 32-bit mask from prefix length
     e.g. 17 -> 0xffff8000
@@ -42,8 +44,8 @@ static inline bool match_ip(uint32_t pkt_ip, uint32_t rule_ip, uint32_t mask) {
 */
 static inline bool match_rule(const rule_t *r, const flow_key_t *k) {
     if (r->protocol && r->protocol != k->protocol) return false;
-    if (r->src_port && r->src_port != k->src_ip) return false;
-    if (r->dst_port && r->dst_port != k->dst_ip) return false;
+    if (r->src_port && r->src_port != k->src_port) return false;
+    if (r->dst_port && r->dst_port != k->dst_port) return false;
     if (!(match_ip(k->src_ip, r->src_ip, r->src_mask) &&
           match_ip(k->dst_ip, r->dst_ip, r->dst_mask)))
         return false;
@@ -95,7 +97,7 @@ int rule_table_add(rule_table_t *t, const rule_t *r_in) {
     rule_t r = *r_in;
 
     /* Assign stable rule ID by insertion order */
-    r.rule_id = t->count;
+    r.rule_id = (uint32_t)t->count;
 
     /* If mask=0 (wildcard), src_ip, dst_ip don't matter */
     if (r.src_mask == 0) r.src_ip = 0;

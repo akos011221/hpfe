@@ -12,7 +12,7 @@ typedef struct {
     int verbose;       // 0..2
     int duration_sec;  // 0 = run forever
 
-    rule_table_t ft;
+    rule_table_t rt;
 } upe_config_t;
 
 #endif
